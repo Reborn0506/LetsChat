@@ -19,6 +19,7 @@ import { auth, db } from '../firebaseConfig';
 import { get, update, ref as dbRef } from "firebase/database";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Picker} from '@react-native-picker/picker';
+
 interface UserProfile {
   name: string;
   bio: string;
@@ -27,6 +28,13 @@ interface UserProfile {
   photoURL: string;
   joinedDate: string;
 }
+const GENDER_OPTIONS = [
+  { label: 'Select Gender', value: '' },
+  { label: 'Male', value: 'male' },
+  { label: 'Female', value: 'female' },
+  { label: 'Other', value: 'other' },
+  { label: 'Prefer not to say', value: 'not_specified' }
+];
 
 export default function ProfileView() {
   const [image, setImage] = useState<string | null>(null);
@@ -163,7 +171,7 @@ export default function ProfileView() {
     const [selectedDate, setSelectedDate] = useState(
       editedProfile.birthday ? new Date(editedProfile.birthday) : new Date()
     );
-
+    const [showGenderPicker, setShowGenderPicker] = useState(Platform.OS === 'ios' ? false : true);
     const handleDateChange = (event: any, selectedDate?: Date) => {
       setShowDatePicker(Platform.OS === 'ios');
       if (selectedDate) {
@@ -182,9 +190,110 @@ export default function ProfileView() {
         day: 'numeric'
       });
     };
-    const [selectedLanguage, setSelectedLanguage] =useState();
-    const [sPicker, setsPicker] =useState(false)
 
+    
+    const handleGenderChange = (itemValue: string) => {
+      setEditedProfile({ ...editedProfile, gender: itemValue });
+      if (Platform.OS === 'ios') {
+        setShowGenderPicker(false);
+      }
+    };
+
+    const GenderSelector = () => {
+      if (Platform.OS === 'ios') {
+        return (
+          <View>
+            <TouchableOpacity 
+              style={styles.pickerButton}
+              onPress={() => setShowGenderPicker(true)}
+            >
+              <Text style={styles.pickerButtonText}>
+                {editedProfile.gender ? 
+                  GENDER_OPTIONS.find(option => option.value === editedProfile.gender)?.label : 
+                  'Select Gender'}
+              </Text>
+            </TouchableOpacity>
+
+            {showGenderPicker && (
+              <View style={styles.iosPickerContainer}>
+                <View style={styles.iosPickerHeader}>
+                  <TouchableOpacity 
+                    onPress={() => setShowGenderPicker(false)}
+                    style={styles.iosPickerHeaderButton}
+                  >
+                    <Text style={styles.iosPickerDoneText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <Picker
+                  selectedValue={editedProfile.gender}
+                  onValueChange={handleGenderChange}
+                  style={styles.iosPicker}
+                >
+                  {GENDER_OPTIONS.map((option) => (
+                    <Picker.Item 
+                      key={option.value} 
+                      label={option.label} 
+                      value={option.value}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+          </View>
+        );
+      }
+
+      // Android Picker
+      return (
+        <View style={styles.androidPickerContainer}>
+          <Picker
+            selectedValue={editedProfile.gender}
+            onValueChange={handleGenderChange}
+            style={styles.androidPicker}
+            mode="dropdown"
+          >
+            {GENDER_OPTIONS.map((option) => (
+              <Picker.Item 
+                key={option.value} 
+                label={option.label} 
+                value={option.value}
+              />
+            ))}
+          </Picker>
+        </View>
+      );
+    };
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     return (
       <Portal>
         <Modal
@@ -226,18 +335,7 @@ export default function ProfileView() {
               />
             )}
 
-
-              <Button onPress={() => setsPicker(true)} style={styles.input}>Gender</Button>
-            {
-              sPicker &&
-              <Picker
-              selectedValue={selectedLanguage}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedLanguage(itemValue)
-              }>
-                <Picker.Item label="Male" value="male"/>
-                <Picker.Item label="Female" value="female"/>
-              </Picker>}
+              <GenderSelector />
 
 
             <View style={styles.modalButtons}>
@@ -421,5 +519,63 @@ const styles = StyleSheet.create({
   datePickerButtonText: {
     fontSize: 16,
     color: '#333',
+  },
+  pickerContainer: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  pickerButton: {
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  pickerButtonText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  androidPickerContainer: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    marginBottom: 15,
+    overflow: 'hidden',
+  },
+  androidPicker: {
+    height: 50,
+    width: '100%',
+  },
+  iosPickerContainer: {
+    backgroundColor: 'white',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+  },
+  iosPickerHeader: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    padding: 15,
+    backgroundColor: '#f8f8f8',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  iosPickerHeaderButton: {
+    paddingHorizontal: 15,
+  },
+  iosPickerDoneText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  iosPicker: {
+    height: 216,
+    backgroundColor: 'white',
   },
 });
