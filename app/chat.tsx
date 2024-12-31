@@ -270,11 +270,11 @@ const styles = StyleSheet.create({
   },
   selfChat: {
     backgroundColor: "#d1f7d1",
-    alignSelf: "flex-start",
+    alignSelf: "flex-end",
   },
   otherChat: {
     backgroundColor: "#e1ffc7",
-    alignSelf: "flex-end",
+    alignSelf: "flex-start",
   },
   username: {
     fontWeight: "bold",
