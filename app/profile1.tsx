@@ -8,8 +8,7 @@ import {
   StyleSheet, 
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
-  Platform
+  Alert
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { Button, TextInput, Portal, Modal } from "react-native-paper";
@@ -159,29 +158,8 @@ export default function ProfileView() {
 
   const EditProfileModal = () => {
     const [editedProfile, setEditedProfile] = useState(profile);
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(
-      editedProfile.birthday ? new Date(editedProfile.birthday) : new Date()
-    );
-
-    const handleDateChange = (event: any, selectedDate?: Date) => {
-      setShowDatePicker(Platform.OS === 'ios');
-      if (selectedDate) {
-        setSelectedDate(selectedDate);
-        const formattedDate = selectedDate.toISOString().split('T')[0];
-        setEditedProfile({ ...editedProfile, birthday: formattedDate });
-      }
-    };
-
-    const formatDisplayDate = (dateString: string) => {
-      if (!dateString) return 'Select Birthday';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    };
+    const [date, setDate] = useState(null)
+    const [showPicker, setShowPicker] =useState(false)
     const [selectedLanguage, setSelectedLanguage] =useState();
     const [sPicker, setsPicker] =useState(false)
 
@@ -192,7 +170,7 @@ export default function ProfileView() {
           onDismiss={() => setEditModalVisible(false)}
           contentContainerStyle={styles.modalContainer}
         >
-          <View style={styles.modalContent}>
+          <ScrollView>
             <TextInput
               label="Name"
               value={editedProfile.name}
@@ -207,24 +185,14 @@ export default function ProfileView() {
               numberOfLines={3}
               style={styles.input}
             />
-               <TouchableOpacity 
-              style={styles.datePickerButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.datePickerButtonText}>
-                {formatDisplayDate(editedProfile.birthday)}
-              </Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display="default"
-                onChange={handleDateChange}
-                maximumDate={new Date()}
-              />
-            )}
+             <Button onPress={() => setShowPicker(true)} style={styles.input}>Birthday</Button>
+              {
+              showPicker &&
+              (<DateTimePicker
+                mode={'date'}
+                value={date || new Date()}/>
+              )
+              }
 
 
               <Button onPress={() => setsPicker(true)} style={styles.input}>Gender</Button>
@@ -246,7 +214,7 @@ export default function ProfileView() {
                 Save
               </Button>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       </Portal>
     );
@@ -310,9 +278,6 @@ export default function ProfileView() {
 }
 
 const styles = StyleSheet.create({
-    modalContent: {
-        padding: 20,
-      },
   safeArea: {
     flex: 1,
     backgroundColor: "#fff",
@@ -401,8 +366,10 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: 'white',
-    margin: 10,
+    padding: 20,
+    margin: 20,
     borderRadius: 10,
+    maxHeight: '80%',
   },
   input: {
     marginBottom: 15,
@@ -411,15 +378,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 20,
-  },
-  datePickerButton: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  datePickerButtonText: {
-    fontSize: 16,
-    color: '#333',
   },
 });
